@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using OrderProcessingMVC.Context;
+using OrderProcessingMVC.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<OrderContext>(opt => opt.UseInMemoryDatabase("OrderContext"));
-
+builder.Services.AddScoped(typeof(OrdersRepository));
 var app = builder.Build();
 
 
