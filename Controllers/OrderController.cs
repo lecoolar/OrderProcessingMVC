@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,19 +15,22 @@ namespace OrderProcessingMVC.Controllers
 {
     public class OrderController : Controller
     {
-        private readonly OrdersRepository _reprository;
+        private readonly OrdersRepository _ordersReprository;
+        private readonly ProvidersRepository _providersRepository;
 
-        public OrderController(OrdersRepository context)
+        public OrderController(OrderContext context)
         {
-            _reprository = context;
+            _providersRepository = new ProvidersRepository(context);
+            _ordersReprository = new OrdersRepository(context);
+
         }
 
         // GET: Order
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? sortBy = null)
         {
             try
             {
-                var orderContext = await _reprository.GetOrders();
+                var orderContext = await _ordersReprository.GetOrders(sortBy);
                 return View(orderContext.ToList());
             }
             catch (Exception ex)
@@ -35,18 +39,31 @@ namespace OrderProcessingMVC.Controllers
             }
         }
 
+        public async Task<IActionResult> FilterOrders(string? sortBy = null)
+        {
+            var orders = await _ordersReprository.GetOrders(sortBy);
+            return PartialView("Index",orders.ToList());
+        }
+
         // GET: Order/Details/5
         public async Task<IActionResult> Details(long? id)
         {
-            var order = await _reprository.GetOrder(id);
+            try
+            {
+                var order = await _ordersReprository.GetOrder(id);
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
-            return View(order);
         }
 
         //// GET: Order/Create
         public async Task<IActionResult> Create()
         {
-            ViewData["ProviderId"] = new SelectList(await _reprository.GetProviders(), "Id", "Id");
+            ViewData["ProviderId"] = new SelectList(await _providersRepository.GetProviders(), "Id", "Name");
             return View();
         }
 
@@ -55,22 +72,35 @@ namespace OrderProcessingMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Number,Date,ProviderId")] Order order)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _reprository.AddOrder(order);
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _ordersReprository.AddOrder(order);
+                    return RedirectToAction(nameof(Index));
+                }
+                ViewData["ProviderId"] = new SelectList(await _providersRepository.GetProviders(), "Id", "Name", order.ProviderId);
+                return View(order);
             }
-            ViewData["ProviderId"] = new SelectList(await _reprository.GetProviders(), "Id", "Id", order.ProviderId);
-            return View(order);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         //// GET: Order/Edit/5
         public async Task<IActionResult> Edit(long? id)
         {
-
-            var order = await _reprository.GetOrder(id);
-            ViewData["ProviderId"] = new SelectList(await _reprository.GetProviders(), "Id", "Id", order.ProviderId);
-            return View(order);
+            try
+            {
+                var order = await _ordersReprository.GetOrder(id);
+                ViewData["ProviderId"] = new SelectList(await _providersRepository.GetProviders(), "Id", "Name", order.ProviderId);
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         //// POST: Order/Edit/5
@@ -78,25 +108,39 @@ namespace OrderProcessingMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(long id, [Bind("Id,Number,Date,ProviderId")] Order order)
         {
-            if (id != order.Id)
+            try
             {
-                return NotFound();
-            }
+                if (id != order.Id)
+                {
+                    return NotFound();
+                }
 
-            if (ModelState.IsValid)
-            {
-                _reprository.EditOrder(order);
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _ordersReprository.EditOrder(order);
+                    return RedirectToAction(nameof(Index));
+                }
+                ViewData["ProviderId"] = new SelectList(await _providersRepository.GetProviders(), "Id", "Name", order.ProviderId);
+                return View(order);
             }
-            ViewData["ProviderId"] = new SelectList(await _reprository.GetProviders(), "Id", "Id", order.ProviderId);
-            return View(order);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         //// GET: Order/Delete/5
         public async Task<IActionResult> Delete(long? id)
         {
-            var order = await _reprository.GetOrder(id);
-            return View(order);
+            try
+            {
+                var order = await _ordersReprository.GetOrder(id);
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         //// POST: Order/Delete/5
@@ -104,8 +148,15 @@ namespace OrderProcessingMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(long id)
         {
-            _reprository.DeleteOrder(id);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                _ordersReprository.DeleteOrder(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
     }

@@ -19,8 +19,8 @@ namespace OrderProcessingMVC.Context
         {
             modelBuilder.Entity<Order>()
                 .HasOne<Provider>(p => p.Provider)
-                .WithOne(o => o.Order)
-                .HasForeignKey<Order>(o=>o.ProviderId)
+                .WithMany(o => o.Orders)
+                .HasForeignKey(o=>o.ProviderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .IsRequired();
 

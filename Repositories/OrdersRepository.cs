@@ -17,11 +17,11 @@ namespace OrderProcessingMVC.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Order>> GetOrders(string sortBy = null, bool descending = false,
-            List<string> filterNumbers = null,
-            string filterStartDate = null,
-            string filterEndDate = null,
-            List<Provider> providers = null)
+        public async Task<IEnumerable<Order>> GetOrders(string? sortBy = null, bool descending = false,
+            List<string>? filterNumbers = null,
+            string? filterStartDate = null,
+            string? filterEndDate = null,
+            List<Provider>? providers = null)
         {
             IEnumerable<Order> orders = await _context.Orders.Include(o => o.Provider).ToArrayAsync();
             if (sortBy != null)
@@ -62,8 +62,25 @@ namespace OrderProcessingMVC.Repositories
 
         public async void AddOrder(Order order)
         {
-            _context.Add(order);
-            await _context.SaveChangesAsync();
+            var provider = await _context.Providers.FirstOrDefaultAsync(p => p.Id == order.ProviderId);
+            if (provider != null)
+            {
+                if (provider.Orders == null)
+                {
+                    provider.Orders = new List<Order>() { order };
+                }
+                else
+                {
+                    provider.Orders.Add(order);
+                }
+                order.Provider = provider;
+                _context.Add(order);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                throw new Exception("NotFound Provider");
+            }
         }
 
         public async void EditOrder(Order order)
@@ -99,12 +116,6 @@ namespace OrderProcessingMVC.Repositories
             }
 
             await _context.SaveChangesAsync();
-        }
-
-        public async Task<IEnumerable<Provider>> GetProviders()
-        {
-            var providers = await _context.Providers.ToArrayAsync();
-            return providers;
         }
 
         private bool OrderExists(long id)
