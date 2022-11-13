@@ -20,16 +20,17 @@ namespace OrderProcessingMVC.Context
             modelBuilder.Entity<Order>()
                 .HasOne<Provider>(p => p.Provider)
                 .WithMany(o => o.Orders)
-                .HasForeignKey(o=>o.ProviderId)
+                .HasForeignKey(o => o.ProviderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .IsRequired();
 
             modelBuilder.Entity<OrderItem>()
                 .HasOne<Order>(o => o.Order)
-                .WithOne(t => t.OrderItem)
-                .HasForeignKey<OrderItem>(t => t.OrderId)
+                .WithMany(t => t.OrderItem)
+                .HasForeignKey(t => t.OrderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .IsRequired();
         }
+
     }
 }

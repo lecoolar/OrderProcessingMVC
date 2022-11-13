@@ -22,7 +22,6 @@ namespace OrderProcessingMVC.Controllers
         {
             _providersRepository = new ProvidersRepository(context);
             _ordersReprository = new OrdersRepository(context);
-
         }
 
         // GET: Order
@@ -30,8 +29,8 @@ namespace OrderProcessingMVC.Controllers
         {
             try
             {
-                var orderContext = await _ordersReprository.GetOrders(sortBy, descending);
-                return View(orderContext.ToList());
+                var orders = await _ordersReprository.GetOrders(sortBy, descending);
+                return View(orders.ToList());
             }
             catch (Exception ex)
             {
@@ -146,6 +145,7 @@ namespace OrderProcessingMVC.Controllers
         //// POST: Order/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+
         public async Task<IActionResult> DeleteConfirmed(long id)
         {
             try

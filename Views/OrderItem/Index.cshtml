@@ -14,48 +14,51 @@
         <tr>
             <th>
                 <a class=" btn btn-outline-primary sort OrderItem" role="button">
-                @Html.DisplayNameFor(model => model.Name)
+                    @Html.DisplayNameFor(model => model.Name)
                 </a>
             </th>
             <th>
                 <a class=" btn btn-outline-primary sort OrderItem" role="button">
-                @Html.DisplayNameFor(model => model.Quantity)
+                    @Html.DisplayNameFor(model => model.Quantity)
                 </a>
             </th>
             <th>
                 <a class=" btn btn-outline-primary sort OrderItem" role="button">
-                @Html.DisplayNameFor(model => model.Unit)
+                    @Html.DisplayNameFor(model => model.Unit)
                 </a>
             </th>
             <th>
                 <a class=" btn btn-outline-primary sort OrderItem" role="button">
-                @Html.DisplayNameFor(model => model.Order)
+                    @Html.DisplayNameFor(model => model.Order)
                 </a>
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Quantity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Unit)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Order.Id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Unit)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Order.Number)
+                </td>
+                <td>
+                    <div class="btn-group" role="group" aria-label="Basic example">
+                        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                        <a class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        <a class="btn btn-primary" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </div>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

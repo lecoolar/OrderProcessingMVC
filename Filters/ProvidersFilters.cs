@@ -4,7 +4,7 @@ namespace OrderProcessingMVC.Filters
 {
     public static class ProvidersFilters
     {
-        private const string Name = "number";
+        private const string Name = "name";
 
 
         public static IEnumerable<Provider> SortOrderBy(IEnumerable<Provider> providers, string sortBy,
@@ -15,7 +15,7 @@ namespace OrderProcessingMVC.Filters
                 switch (sortBy.ToLower())
                 {
                     case Name:
-                        providers.OrderByDescending(o => o.Name);
+                        providers = providers.OrderByDescending(o => o.Name);
                         break;
                     default:
                         throw new Exception("Incorrect Sort Filters");
@@ -26,7 +26,7 @@ namespace OrderProcessingMVC.Filters
                 switch (sortBy.ToLower())
                 {
                     case Name:
-                        providers.OrderBy(o => o.Name);
+                        providers = providers.OrderBy(o => o.Name);
                         break;
                     default:
                         throw new Exception("Incorrect Sort Filters");

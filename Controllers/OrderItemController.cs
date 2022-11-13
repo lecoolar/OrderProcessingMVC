@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -7,48 +8,59 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OrderProcessingMVC.Context;
 using OrderProcessingMVC.Models;
+using OrderProcessingMVC.Repositories;
 
 namespace OrderProcessingMVC.Controllers
 {
     public class OrderItemController : Controller
     {
-        private readonly OrderContext _context;
+        private readonly OrderItemRepository _orderItemRepository;
+        private readonly OrdersRepository _ordersReprository;
 
         public OrderItemController(OrderContext context)
         {
-            _context = context;
+            _orderItemRepository = new OrderItemRepository(context);
+            _ordersReprository = new OrdersRepository(context);
         }
 
         // GET: OrderItem
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? sortBy = null, bool descending = false)
         {
-            var orderContext = _context.OrderItems.Include(o => o.Order);
-            return View(await orderContext.ToListAsync());
+            try
+            {
+                var orderItems = await _orderItemRepository.GetOrderItems(sortBy, descending);
+                return View(orderItems.ToList());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        public async Task<IActionResult> Sortby(string? sortBy = null, bool descending = false)
+        {
+            var orderItems = await _orderItemRepository.GetOrderItems(sortBy, descending);
+            return PartialView("Index", orderItems.ToList());
         }
 
         // GET: OrderItem/Details/5
         public async Task<IActionResult> Details(long? id)
         {
-            if (id == null || _context.OrderItems == null)
+            try
             {
-                return NotFound();
+                var order = await _orderItemRepository.GetOrderItem(id);
+                return View(order);
             }
-
-            var orderItem = await _context.OrderItems
-                .Include(o => o.Order)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (orderItem == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return BadRequest(ex.Message);
             }
-
-            return View(orderItem);
         }
 
         // GET: OrderItem/Create
-        public IActionResult Create()
+        public async Task<IActionResult> CreateAsync()
         {
-            ViewData["OrderId"] = new SelectList(_context.Orders, "Id", "Id");
+            ViewData["OrderId"] = new SelectList(await _ordersReprository.GetOrders(), "Id", "Number");
             return View();
         }
 
@@ -59,31 +71,35 @@ namespace OrderProcessingMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Quantity,Unit,OrderId")] OrderItem orderItem)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(orderItem);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _orderItemRepository.AddOrder(orderItem);
+                    return RedirectToAction(nameof(Index));
+                }
+                ViewData["OrderId"] = new SelectList(await _ordersReprository.GetOrders(), "Id", "Number", orderItem.OrderId);
+                return View(orderItem);
             }
-            ViewData["OrderId"] = new SelectList(_context.Orders, "Id", "Id", orderItem.OrderId);
-            return View(orderItem);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // GET: OrderItem/Edit/5
         public async Task<IActionResult> Edit(long? id)
         {
-            if (id == null || _context.OrderItems == null)
+            try
             {
-                return NotFound();
+                var orderItem = await _orderItemRepository.GetOrderItem(id);
+                ViewData["OrderId"] = new SelectList(await _ordersReprository.GetOrders(), "Id", "Number", orderItem.OrderId);
+                return View(orderItem);
             }
-
-            var orderItem = await _context.OrderItems.FindAsync(id);
-            if (orderItem == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return BadRequest(ex.Message);
             }
-            ViewData["OrderId"] = new SelectList(_context.Orders, "Id", "Id", orderItem.OrderId);
-            return View(orderItem);
         }
 
         // POST: OrderItem/Edit/5
@@ -93,52 +109,39 @@ namespace OrderProcessingMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(long id, [Bind("Id,Name,Quantity,Unit,OrderId")] OrderItem orderItem)
         {
-            if (id != orderItem.Id)
+            try
             {
-                return NotFound();
-            }
+                if (id != orderItem.Id)
+                {
+                    return NotFound();
+                }
 
-            if (ModelState.IsValid)
-            {
-                try
+                if (ModelState.IsValid)
                 {
-                    _context.Update(orderItem);
-                    await _context.SaveChangesAsync();
+                    _orderItemRepository.EditOrder(orderItem);
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!OrderItemExists(orderItem.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                ViewData["OrderId"] = new SelectList(await _ordersReprository.GetOrders(), "Id", "Number", orderItem.OrderId);
+                return View(orderItem);
             }
-            ViewData["OrderId"] = new SelectList(_context.Orders, "Id", "Id", orderItem.OrderId);
-            return View(orderItem);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // GET: OrderItem/Delete/5
         public async Task<IActionResult> Delete(long? id)
         {
-            if (id == null || _context.OrderItems == null)
+            try
             {
-                return NotFound();
+                var order = await _orderItemRepository.GetOrderItem(id);
+                return View(order);
             }
-
-            var orderItem = await _context.OrderItems
-                .Include(o => o.Order)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (orderItem == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return BadRequest(ex.Message);
             }
-
-            return View(orderItem);
         }
 
         // POST: OrderItem/Delete/5
@@ -146,23 +149,15 @@ namespace OrderProcessingMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(long id)
         {
-            if (_context.OrderItems == null)
+            try
             {
-                return Problem("Entity set 'OrderContext.OrderItems'  is null.");
+                _orderItemRepository.DeleteOrder(id);
+                return RedirectToAction(nameof(Index));
             }
-            var orderItem = await _context.OrderItems.FindAsync(id);
-            if (orderItem != null)
+            catch (Exception ex)
             {
-                _context.OrderItems.Remove(orderItem);
+                return BadRequest(ex.Message);
             }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool OrderItemExists(long id)
-        {
-          return _context.OrderItems.Any(e => e.Id == id);
         }
     }
 }
