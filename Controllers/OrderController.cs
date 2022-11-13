@@ -26,11 +26,11 @@ namespace OrderProcessingMVC.Controllers
         }
 
         // GET: Order
-        public async Task<IActionResult> Index(string? sortBy = null)
+        public async Task<IActionResult> Index(string? sortBy = null, bool descending = false)
         {
             try
             {
-                var orderContext = await _ordersReprository.GetOrders(sortBy);
+                var orderContext = await _ordersReprository.GetOrders(sortBy, descending);
                 return View(orderContext.ToList());
             }
             catch (Exception ex)
@@ -39,10 +39,10 @@ namespace OrderProcessingMVC.Controllers
             }
         }
 
-        public async Task<IActionResult> FilterOrders(string? sortBy = null)
+        public async Task<IActionResult> Sortby(string? sortBy = null, bool descending = false)
         {
-            var orders = await _ordersReprository.GetOrders(sortBy);
-            return PartialView("Index",orders.ToList());
+            var orders = await _ordersReprository.GetOrders(sortBy, descending);
+            return PartialView("Index", orders.ToList());
         }
 
         // GET: Order/Details/5

@@ -113,6 +113,7 @@ namespace OrderProcessingMVC.Repositories
             if (order != null)
             {
                 _context.Orders.Remove(order);
+                //_context.Providers.FirstOrDefaultAsync(p=>p.Orders)
             }
 
             await _context.SaveChangesAsync();

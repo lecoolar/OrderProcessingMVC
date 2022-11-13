@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using OrderProcessingMVC.Models;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
@@ -8,25 +9,26 @@ namespace OrderProcessingMVC.Filters
     public static class OrdersFilters
     {
         private const string Number = "number";
-        private const string Date = "startdate";
+        private const string Date = "date";
         private const string Provider = "provider";
         private const int AddMonths = -1;
 
         public static IEnumerable<Order> SortOrderBy(IEnumerable<Order> orders, string sortBy,
             bool descending = false)
         {
+            IEnumerable<Order> result;
             if (descending)
             {
                 switch (sortBy.ToLower())
                 {
                     case Number:
-                        orders.OrderByDescending(o => o.Number);
+                        result = orders.OrderByDescending(o => o.Number);
                         break;
                     case Date:
-                        orders.OrderByDescending(o => o.Date);
+                        result = orders.OrderByDescending(o => o.Date);
                         break;
                     case Provider:
-                        orders.OrderByDescending(o => o.Provider);
+                        result = orders.OrderByDescending(o => o.Provider);
                         break;
                     default:
                         throw new Exception("Incorrect Sort Filters");
@@ -37,19 +39,19 @@ namespace OrderProcessingMVC.Filters
                 switch (sortBy.ToLower())
                 {
                     case Number:
-                        orders.OrderBy(o => o.Number);
+                        result = orders.OrderBy(o => o.Number);
                         break;
                     case Date:
-                        orders.OrderBy(o => o.Date);
+                        result = orders.OrderBy(o => o.Date);
                         break;
                     case Provider:
-                        orders.OrderBy(o => o.Provider);
+                        result = orders.OrderBy(o => o.Provider);
                         break;
                     default:
                         throw new Exception("Incorrect Sort Filters");
                 }
             }
-            return orders;
+            return result;
         }
 
         public static IEnumerable<Order> FilterByNumber(IEnumerable<Order> orders,
