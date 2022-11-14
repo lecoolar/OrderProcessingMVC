@@ -3,9 +3,9 @@ using OrderProcessingMVC.Models;
 
 namespace OrderProcessingMVC.Context
 {
-    public class OrderContext : DbContext
+    public class DateBaseOrderContext : DbContext
     {
-        public OrderContext(DbContextOptions<OrderContext> options)
+        public DateBaseOrderContext(DbContextOptions<DateBaseOrderContext> options)
             : base(options)
         {
             this.Database.EnsureCreated();

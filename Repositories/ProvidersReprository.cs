@@ -7,9 +7,9 @@ namespace OrderProcessingMVC.Repositories
 {
     public class ProvidersRepository
     {
-        private readonly OrderContext _context;
+        private readonly DateBaseOrderContext _context;
 
-        public ProvidersRepository(OrderContext context)
+        public ProvidersRepository(DateBaseOrderContext context)
         {
             if (!context.Providers.Any())
             {
@@ -24,7 +24,7 @@ namespace OrderProcessingMVC.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Provider>> GetProviders(string? sortBy = null, bool descending = false,
+        public async Task<IEnumerable<Provider>> GetProvidersAsync(string? sortBy = null, bool descending = false,
             List<string>? filterName = null)
         {
             IEnumerable<Provider> providers = await _context.Providers.Include(p => p.Orders).ToArrayAsync();
@@ -39,7 +39,7 @@ namespace OrderProcessingMVC.Repositories
             return providers;
         }
 
-        public async Task<Provider> GetProvider(long? id)
+        public async Task<Provider> GetProviderAsync(long? id)
         {
             if (id == null || _context.Providers == null)
             {

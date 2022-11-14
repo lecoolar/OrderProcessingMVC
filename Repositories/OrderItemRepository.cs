@@ -7,14 +7,14 @@ namespace OrderProcessingMVC.Repositories
 {
     public class OrderItemRepository
     {
-        private readonly OrderContext _context;
+        private readonly DateBaseOrderContext _context;
 
-        public OrderItemRepository(OrderContext context)
+        public OrderItemRepository(DateBaseOrderContext context)
         {
             _context = context;
         }
 
-        public async Task<IEnumerable<OrderItem>> GetOrderItems(string? sortBy = null, bool descending = false,
+        public async Task<IEnumerable<OrderItem>> GetOrderItemsAsync(string? sortBy = null, bool descending = false,
             List<string>? filterNames = null,
             List<string>? units = null)
         {
@@ -34,7 +34,7 @@ namespace OrderProcessingMVC.Repositories
             return orderItems;
         }
 
-        public async Task<OrderItem> GetOrderItem(long? id)
+        public async Task<OrderItem> GetOrderItemAsync(long? id)
         {
             if (id == null || _context.OrderItems == null)
             {
@@ -51,9 +51,9 @@ namespace OrderProcessingMVC.Repositories
             return orderItems;
         }
 
-        public async void AddOrder(OrderItem orderItems)
+        public async Task AddOrderAsync(OrderItem orderItems)
         {
-            var order = await _context.Orders.FirstOrDefaultAsync(p => p.Id == orderItems.OrderId);
+            var order = await _context.Orders.Include(o => o.OrderItem).FirstOrDefaultAsync(p => p.Id == orderItems.OrderId);
             if (order != null)
             {
                 if (order.OrderItem == null)
@@ -74,7 +74,7 @@ namespace OrderProcessingMVC.Repositories
             }
         }
 
-        public async void EditOrder(OrderItem orderItem)
+        public async Task EditOrderAsync(OrderItem orderItem)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace OrderProcessingMVC.Repositories
             }
         }
 
-        public async void DeleteOrder(long id)
+        public async Task DeleteOrderAsync(long id)
         {
             if (_context.Orders == null)
             {
@@ -108,8 +108,6 @@ namespace OrderProcessingMVC.Repositories
 
             await _context.SaveChangesAsync();
         }
-
-
 
         private bool OrderExists(long id)
         {

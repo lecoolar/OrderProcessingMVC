@@ -18,10 +18,10 @@ namespace OrderProcessingMVC.Controllers
         private readonly OrdersRepository _ordersReprository;
         private readonly ProvidersRepository _providersRepository;
 
-        public OrderController(OrderContext context)
+        public OrderController(OrdersRepository ordersRepository, ProvidersRepository providersRepository)
         {
-            _providersRepository = new ProvidersRepository(context);
-            _ordersReprository = new OrdersRepository(context);
+            _providersRepository = providersRepository;
+            _ordersReprository = ordersRepository;
         }
 
         // GET: Order
@@ -29,7 +29,7 @@ namespace OrderProcessingMVC.Controllers
         {
             try
             {
-                var orders = await _ordersReprository.GetOrders(sortBy, descending);
+                var orders = await _ordersReprository.GetOrdersAsync(sortBy, descending);
                 return View(orders.ToList());
             }
             catch (Exception ex)
@@ -40,8 +40,15 @@ namespace OrderProcessingMVC.Controllers
 
         public async Task<IActionResult> Sortby(string? sortBy = null, bool descending = false)
         {
-            var orders = await _ordersReprository.GetOrders(sortBy, descending);
-            return PartialView("Index", orders.ToList());
+            try
+            {
+                var orders = await _ordersReprository.GetOrdersAsync(sortBy, descending);
+                return PartialView("Index", orders.ToList());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // GET: Order/Details/5
@@ -49,36 +56,42 @@ namespace OrderProcessingMVC.Controllers
         {
             try
             {
-                var order = await _ordersReprository.GetOrder(id);
+                var order = await _ordersReprository.GetOrderAsync(id);
                 return View(order);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-
         }
 
         //// GET: Order/Create
         public async Task<IActionResult> Create()
         {
-            ViewData["ProviderId"] = new SelectList(await _providersRepository.GetProviders(), "Id", "Name");
-            return View();
+            try
+            {
+                ViewData["ProviderId"] = new SelectList(await _providersRepository.GetProvidersAsync(), nameof(Provider.Id), nameof(Provider.Name));
+                return View();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         //// POST: Order/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Number,Date,ProviderId")] Order order)
+        public async Task<IActionResult> Create([Bind(nameof(Order.Id), nameof(Order.Number), nameof(Order.Date), nameof(Order.ProviderId))] Order order)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    _ordersReprository.AddOrder(order);
+                    await _ordersReprository.AddOrderAsync(order);
                     return RedirectToAction(nameof(Index));
                 }
-                ViewData["ProviderId"] = new SelectList(await _providersRepository.GetProviders(), "Id", "Name", order.ProviderId);
+                ViewData["ProviderId"] = new SelectList(await _providersRepository.GetProvidersAsync(), nameof(Provider.Id), nameof(Provider.Name), order.ProviderId);
                 return View(order);
             }
             catch (Exception ex)
@@ -92,8 +105,8 @@ namespace OrderProcessingMVC.Controllers
         {
             try
             {
-                var order = await _ordersReprository.GetOrder(id);
-                ViewData["ProviderId"] = new SelectList(await _providersRepository.GetProviders(), "Id", "Name", order.ProviderId);
+                var order = await _ordersReprository.GetOrderAsync(id);
+                ViewData["ProviderId"] = new SelectList(await _providersRepository.GetProvidersAsync(), nameof(Provider.Id), nameof(Provider.Name), order.ProviderId);
                 return View(order);
             }
             catch (Exception ex)
@@ -105,7 +118,7 @@ namespace OrderProcessingMVC.Controllers
         //// POST: Order/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,Number,Date,ProviderId")] Order order)
+        public async Task<IActionResult> Edit(long id, [Bind(nameof(Order.Id), nameof(Order.Number), nameof(Order.Date), nameof(Order.ProviderId))] Order order)
         {
             try
             {
@@ -116,10 +129,10 @@ namespace OrderProcessingMVC.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    _ordersReprository.EditOrder(order);
+                    await _ordersReprository.EditOrderAsync(order);
                     return RedirectToAction(nameof(Index));
                 }
-                ViewData["ProviderId"] = new SelectList(await _providersRepository.GetProviders(), "Id", "Name", order.ProviderId);
+                ViewData["ProviderId"] = new SelectList(await _providersRepository.GetProvidersAsync(), nameof(Provider.Id), nameof(Provider.Name), order.ProviderId);
                 return View(order);
             }
             catch (Exception ex)
@@ -133,7 +146,7 @@ namespace OrderProcessingMVC.Controllers
         {
             try
             {
-                var order = await _ordersReprository.GetOrder(id);
+                var order = await _ordersReprository.GetOrderAsync(id);
                 return View(order);
             }
             catch (Exception ex)
@@ -150,7 +163,7 @@ namespace OrderProcessingMVC.Controllers
         {
             try
             {
-                _ordersReprository.DeleteOrder(id);
+                await _ordersReprository.DeleteOrderAsync(id);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

@@ -15,9 +15,9 @@ namespace OrderProcessingMVC.Controllers
     {
         private readonly ProvidersRepository _providersRepository;
 
-        public ProviderController(OrderContext context)
+        public ProviderController(ProvidersRepository providersRepository)
         {
-            _providersRepository = new ProvidersRepository(context);
+            _providersRepository = providersRepository;
         }
 
         // GET: Provider
@@ -26,7 +26,7 @@ namespace OrderProcessingMVC.Controllers
         {
             try
             {
-                var providers = await _providersRepository.GetProviders(sortBy, descending, names);
+                var providers = await _providersRepository.GetProvidersAsync(sortBy, descending, names);
                 return View(providers.ToList());
             }
             catch (Exception ex)
@@ -38,8 +38,15 @@ namespace OrderProcessingMVC.Controllers
         public async Task<IActionResult> Sortby(string? sortBy = null,
             bool descending = false, List<string>? names = null)
         {
-            var providers = await _providersRepository.GetProviders(sortBy, descending, names);
-            return PartialView("Index", providers.ToList());
+            try
+            {
+                var providers = await _providersRepository.GetProvidersAsync(sortBy, descending, names);
+                return PartialView("Index", providers.ToList());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // GET: Provider/Details/5
@@ -47,7 +54,7 @@ namespace OrderProcessingMVC.Controllers
         {
             try
             {
-                var provider = await _providersRepository.GetProvider(id);
+                var provider = await _providersRepository.GetProviderAsync(id);
                 return View(provider);
             }
             catch (Exception ex)

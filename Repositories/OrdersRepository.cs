@@ -10,14 +10,14 @@ namespace OrderProcessingMVC.Repositories
 {
     public class OrdersRepository
     {
-        private readonly OrderContext _context;
+        private readonly DateBaseOrderContext _context;
 
-        public OrdersRepository(OrderContext context)
+        public OrdersRepository(DateBaseOrderContext context)
         {
             _context = context;
         }
 
-        public async Task<IEnumerable<Order>> GetOrders(string? sortBy = null, bool descending = false,
+        public async Task<IEnumerable<Order>> GetOrdersAsync(string? sortBy = null, bool descending = false,
             List<string>? filterNumbers = null,
             string? filterStartDate = null,
             string? filterEndDate = null,
@@ -43,7 +43,7 @@ namespace OrderProcessingMVC.Repositories
             return orders;
         }
 
-        public async Task<Order> GetOrder(long? id)
+        public async Task<Order> GetOrderAsync(long? id)
         {
             if (id == null || _context.Orders == null)
             {
@@ -60,9 +60,9 @@ namespace OrderProcessingMVC.Repositories
             return order;
         }
 
-        public async void AddOrder(Order order)
+        public async Task AddOrderAsync(Order order)
         {
-            var provider = await _context.Providers.FirstOrDefaultAsync(p => p.Id == order.ProviderId);
+            var provider = await _context.Providers.Include(p => p.Orders).FirstOrDefaultAsync(p => p.Id == order.ProviderId);
             if (provider != null)
             {
                 if (provider.Orders == null)
@@ -71,7 +71,14 @@ namespace OrderProcessingMVC.Repositories
                 }
                 else
                 {
-                    provider.Orders.Add(order);
+                    if (provider.Orders.FirstOrDefault(o => o.Number == order.Number) != null)
+                    {
+                        throw new Exception("Order number must be unique");
+                    }
+                    else
+                    {
+                        provider.Orders.Add(order);
+                    }
                 }
                 order.Provider = provider;
                 _context.Add(order);
@@ -83,12 +90,28 @@ namespace OrderProcessingMVC.Repositories
             }
         }
 
-        public async void EditOrder(Order order)
+        public async Task EditOrderAsync(Order order)
         {
             try
             {
-                _context.Update(order);
-                await _context.SaveChangesAsync();
+                var provider = await _context.Providers.Include(p => p.Orders)
+                    .FirstOrDefaultAsync(p => p.Id == order.ProviderId);
+                if (provider != null)
+                {
+                    if (provider.Orders.FirstOrDefault(o => o.Number == order.Number) != null)
+                    {
+                        throw new Exception("Order number must be unique");
+                    }
+                    else
+                    {
+                        _context.Update(order);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                else
+                {
+                    throw new Exception("NotFound Provider");
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -103,7 +126,7 @@ namespace OrderProcessingMVC.Repositories
             }
         }
 
-        public async void DeleteOrder(long id)
+        public async Task DeleteOrderAsync(long id)
         {
             if (_context.Orders == null)
             {

@@ -7,8 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<OrderContext>(opt => opt.UseInMemoryDatabase("OrderContext"));
-builder.Services.AddScoped(typeof(OrderContext));
+builder.Services.AddDbContext<DateBaseOrderContext>(opt => opt.UseInMemoryDatabase(nameof(DateBaseOrderContext)));
+builder.Services.AddScoped<OrdersRepository>();
+builder.Services.AddScoped<OrderItemRepository>();
+builder.Services.AddScoped<ProvidersRepository>();
 var app = builder.Build();
 
 
@@ -17,7 +19,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

@@ -17,10 +17,10 @@ namespace OrderProcessingMVC.Controllers
         private readonly OrderItemRepository _orderItemRepository;
         private readonly OrdersRepository _ordersReprository;
 
-        public OrderItemController(OrderContext context)
+        public OrderItemController(OrderItemRepository orderItemRepository, OrdersRepository ordersRepository)
         {
-            _orderItemRepository = new OrderItemRepository(context);
-            _ordersReprository = new OrdersRepository(context);
+            _orderItemRepository = orderItemRepository;
+            _ordersReprository = ordersRepository;
         }
 
         // GET: OrderItem
@@ -28,7 +28,7 @@ namespace OrderProcessingMVC.Controllers
         {
             try
             {
-                var orderItems = await _orderItemRepository.GetOrderItems(sortBy, descending);
+                var orderItems = await _orderItemRepository.GetOrderItemsAsync(sortBy, descending);
                 return View(orderItems.ToList());
             }
             catch (Exception ex)
@@ -39,8 +39,15 @@ namespace OrderProcessingMVC.Controllers
 
         public async Task<IActionResult> Sortby(string? sortBy = null, bool descending = false)
         {
-            var orderItems = await _orderItemRepository.GetOrderItems(sortBy, descending);
-            return PartialView("Index", orderItems.ToList());
+            try
+            {
+                var orderItems = await _orderItemRepository.GetOrderItemsAsync(sortBy, descending);
+                return PartialView("Index", orderItems.ToList());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // GET: OrderItem/Details/5
@@ -48,7 +55,7 @@ namespace OrderProcessingMVC.Controllers
         {
             try
             {
-                var order = await _orderItemRepository.GetOrderItem(id);
+                var order = await _orderItemRepository.GetOrderItemAsync(id);
                 return View(order);
             }
             catch (Exception ex)
@@ -60,8 +67,15 @@ namespace OrderProcessingMVC.Controllers
         // GET: OrderItem/Create
         public async Task<IActionResult> CreateAsync()
         {
-            ViewData["OrderId"] = new SelectList(await _ordersReprository.GetOrders(), "Id", "Number");
-            return View();
+            try
+            {
+                ViewData["OrderId"] = new SelectList(await _ordersReprository.GetOrdersAsync(), nameof(Order.Id), nameof(Order.Number));
+                return View();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // POST: OrderItem/Create
@@ -69,16 +83,16 @@ namespace OrderProcessingMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Quantity,Unit,OrderId")] OrderItem orderItem)
+        public async Task<IActionResult> Create([Bind(nameof(Order.Id), nameof(OrderItem.Name), nameof(OrderItem.Quantity), nameof(OrderItem.Unit), nameof(OrderItem.OrderId))] OrderItem orderItem)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    _orderItemRepository.AddOrder(orderItem);
+                    await _orderItemRepository.AddOrderAsync(orderItem);
                     return RedirectToAction(nameof(Index));
                 }
-                ViewData["OrderId"] = new SelectList(await _ordersReprository.GetOrders(), "Id", "Number", orderItem.OrderId);
+                ViewData["OrderId"] = new SelectList(await _ordersReprository.GetOrdersAsync(), nameof(Order.Id), nameof(Order.Number), orderItem.OrderId);
                 return View(orderItem);
             }
             catch (Exception ex)
@@ -92,8 +106,8 @@ namespace OrderProcessingMVC.Controllers
         {
             try
             {
-                var orderItem = await _orderItemRepository.GetOrderItem(id);
-                ViewData["OrderId"] = new SelectList(await _ordersReprository.GetOrders(), "Id", "Number", orderItem.OrderId);
+                var orderItem = await _orderItemRepository.GetOrderItemAsync(id);
+                ViewData["OrderId"] = new SelectList(await _ordersReprository.GetOrdersAsync(), nameof(Order.Id), nameof(Order.Number), orderItem.OrderId);
                 return View(orderItem);
             }
             catch (Exception ex)
@@ -107,7 +121,7 @@ namespace OrderProcessingMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,Name,Quantity,Unit,OrderId")] OrderItem orderItem)
+        public async Task<IActionResult> Edit(long id, [Bind(nameof(Order.Id), nameof(OrderItem.Name), nameof(OrderItem.Quantity), nameof(OrderItem.Unit), nameof(OrderItem.OrderId))] OrderItem orderItem)
         {
             try
             {
@@ -118,10 +132,10 @@ namespace OrderProcessingMVC.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    _orderItemRepository.EditOrder(orderItem);
+                    await _orderItemRepository.EditOrderAsync(orderItem);
                     return RedirectToAction(nameof(Index));
                 }
-                ViewData["OrderId"] = new SelectList(await _ordersReprository.GetOrders(), "Id", "Number", orderItem.OrderId);
+                ViewData["OrderId"] = new SelectList(await _ordersReprository.GetOrdersAsync(), nameof(Order.Id), nameof(Order.Number), orderItem.OrderId);
                 return View(orderItem);
             }
             catch (Exception ex)
@@ -135,7 +149,7 @@ namespace OrderProcessingMVC.Controllers
         {
             try
             {
-                var order = await _orderItemRepository.GetOrderItem(id);
+                var order = await _orderItemRepository.GetOrderItemAsync(id);
                 return View(order);
             }
             catch (Exception ex)
@@ -151,7 +165,7 @@ namespace OrderProcessingMVC.Controllers
         {
             try
             {
-                _orderItemRepository.DeleteOrder(id);
+                await _orderItemRepository.DeleteOrderAsync(id);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
