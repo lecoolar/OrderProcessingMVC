@@ -45,9 +45,9 @@ namespace OrderProcessingMVC.Controllers
                     filterStartDate, filterEndDate, providerIds);
                 ViewBag.FiltersBy = nameof(Order);
                 ViewBag.Numbers = new MultiSelectList(await _ordersReprository.GetOrdersAsync(),
-                    nameof(Order.Number), nameof(Order.Number), numbers);
+                    nameof(Order.Number), nameof(Order.Number), numbers).Distinct();
                 ViewBag.Providers = new MultiSelectList(await _providersRepository.GetProvidersAsync(),
-                    nameof(Provider.Id), nameof(Provider.Name), providerIds);
+                    nameof(Provider.Id), nameof(Provider.Name), providerIds).Distinct();
                 ViewBag.StartDate = filterStartDate == null ? String.Empty : filterStartDate.Value.ToString("yyyy-MM-ddTHH:mm");
                 ViewBag.EndDate = filterEndDate == null ? String.Empty : filterEndDate.Value.ToString("yyyy-MM-ddTHH:mm");
                 return View(orders.ToList());

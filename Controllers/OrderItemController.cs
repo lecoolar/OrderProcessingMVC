@@ -35,9 +35,9 @@ namespace OrderProcessingMVC.Controllers
                 var orderItems = await _orderItemRepository.GetOrderItemsAsync(sortBy, descending,names,units);
                 ViewBag.FiltersBy = nameof(OrderItem);
                 ViewBag.Names = new MultiSelectList(await _orderItemRepository.GetOrderItemsAsync(),
-                    nameof(OrderItem.Name), nameof(OrderItem.Name), names);
+                    nameof(OrderItem.Name), nameof(OrderItem.Name), names).Distinct();
                 ViewBag.Units = new MultiSelectList(await _orderItemRepository.GetOrderItemsAsync(),
-                    nameof(OrderItem.Unit), nameof(OrderItem.Unit), units);
+                    nameof(OrderItem.Unit), nameof(OrderItem.Unit), units).Distinct();
                 return View(orderItems.ToList());
             }
             catch (Exception ex)
