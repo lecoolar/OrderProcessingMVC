@@ -27,7 +27,7 @@ namespace OrderProcessingMVC.Repositories
             {
                 orderItems = OrderItemsFilters.FilterByName(orderItems, filterNames);
             }
-            if (units != null && units.Count() != 0 )
+            if (units != null && units.Count() != 0)
             {
                 orderItems = OrderItemsFilters.FilterByUnit(orderItems, units);
             }
@@ -83,6 +83,10 @@ namespace OrderProcessingMVC.Repositories
         {
             try
             {
+                var oldOrderItem = await _context.OrderItems.Include(o => o.Order)
+                    .FirstOrDefaultAsync(o => o.Id == orderItem.Id);
+                orderItem.OrderId = oldOrderItem.OrderId;
+                orderItem.Order = oldOrderItem.Order;
                 _context.Update(orderItem);
                 await _context.SaveChangesAsync();
             }
