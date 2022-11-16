@@ -44,10 +44,16 @@ namespace OrderProcessingMVC.Controllers
                 var orders = await _ordersReprository.GetOrdersAsync(sortBy, descending, numbers,
                     filterStartDate, filterEndDate, providerIds);
                 ViewBag.FiltersBy = nameof(Order);
-                ViewBag.Numbers = new MultiSelectList(await _ordersReprository.GetOrdersAsync(),
-                    nameof(Order.Number), nameof(Order.Number), numbers).Distinct();
-                ViewBag.Providers = new MultiSelectList(await _providersRepository.GetProvidersAsync(),
-                    nameof(Provider.Id), nameof(Provider.Name), providerIds).Distinct();
+
+                var filtersNumbers = await _ordersReprository.GetOrdersAsync();
+                var filtersProviders = await _providersRepository.GetProvidersAsync();
+
+                ViewBag.Numbers = new MultiSelectList(filtersNumbers.Distinct(),
+                nameof(Order.Number), nameof(Order.Number), numbers);
+
+                ViewBag.Providers = new MultiSelectList(filtersProviders.Distinct(),
+                nameof(Provider.Id), nameof(Provider.Name), providerIds);
+
                 ViewBag.StartDate = filterStartDate == null ? String.Empty : filterStartDate.Value.ToString("yyyy-MM-ddTHH:mm");
                 ViewBag.EndDate = filterEndDate == null ? String.Empty : filterEndDate.Value.ToString("yyyy-MM-ddTHH:mm");
                 return View(orders.ToList());

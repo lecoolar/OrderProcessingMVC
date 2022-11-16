@@ -29,9 +29,13 @@ namespace OrderProcessingMVC.Controllers
             try
             {
                 var providers = await _providersRepository.GetProvidersAsync(sortBy, descending, filterNames);
+
                 ViewBag.FiltersBy = nameof(Provider);
-                ViewBag.FilterNames = new MultiSelectList(await _providersRepository.GetProvidersAsync(),
-                    nameof(Provider.Name), nameof(Provider.Name), filterNames).Distinct();
+
+                var names = await _providersRepository.GetProvidersAsync();
+
+                ViewBag.FilterNames = new MultiSelectList(names.Distinct(),
+                    nameof(Provider.Name), nameof(Provider.Name), filterNames);
                 return View(providers.ToList());
             }
             catch (Exception ex)
