@@ -45,6 +45,9 @@ namespace OrderProcessingMVC.Filters
                     case Unit:
                         orderItems = orderItems.OrderBy(o => o.Unit);
                         break;
+                    case Order:
+                        orderItems = orderItems.OrderByDescending(o => o.Order);
+                        break;
                     default:
                         throw new Exception("Incorrect Sort Filters");
                 }

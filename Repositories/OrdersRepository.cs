@@ -18,17 +18,17 @@ namespace OrderProcessingMVC.Repositories
         }
 
         public async Task<IEnumerable<Order>> GetOrdersAsync(string? sortBy = null, bool descending = false,
-            List<string>? filterNumbers = null,
-            string? filterStartDate = null,
-            string? filterEndDate = null,
-            List<Provider>? providers = null)
+            IEnumerable<string>? filterNumbers = null,
+            DateTime? filterStartDate = null,
+            DateTime? filterEndDate = null,
+            IEnumerable<long>? providerIds = null)
         {
             IEnumerable<Order> orders = await _context.Orders.Include(o => o.Provider).ToArrayAsync();
             if (sortBy != null)
             {
                 orders = OrdersFilters.SortOrderBy(orders, sortBy, descending);
             }
-            if (filterNumbers != null)
+            if (filterNumbers != null && filterNumbers.Count() != 0)
             {
                 orders = OrdersFilters.FilterByNumber(orders, filterNumbers);
             }
@@ -36,9 +36,9 @@ namespace OrderProcessingMVC.Repositories
             {
                 orders = OrdersFilters.FilterByDate(orders, filterStartDate, filterEndDate);
             }
-            if (providers != null)
+            if (providerIds != null && providerIds.Count() != 0)
             {
-                orders = OrdersFilters.FilterByProvider(orders, providers);
+                orders = OrdersFilters.FilterByProvider(orders, providerIds);
             }
             return orders;
         }
@@ -133,10 +133,14 @@ namespace OrderProcessingMVC.Repositories
                 throw new Exception("Entity set 'OrderContext.Orders'  is null.");
             }
             var order = await _context.Orders.FindAsync(id);
+            var orderItem = await _context.OrderItems.Where(o=>o.OrderId==id).ToArrayAsync();
+            if (orderItem != null)
+            {
+                _context.OrderItems.RemoveRange(orderItem);
+            }
             if (order != null)
             {
                 _context.Orders.Remove(order);
-                //_context.Providers.FirstOrDefaultAsync(p=>p.Orders)
             }
 
             await _context.SaveChangesAsync();

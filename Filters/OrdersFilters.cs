@@ -1,7 +1,9 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using OrderProcessingMVC.Models;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 
 namespace OrderProcessingMVC.Filters
@@ -12,6 +14,7 @@ namespace OrderProcessingMVC.Filters
         private const string Date = "date";
         private const string Provider = "provider";
         private const int AddMonths = -1;
+
 
         public static IEnumerable<Order> SortOrderBy(IEnumerable<Order> orders, string sortBy,
             bool descending = false)
@@ -62,46 +65,45 @@ namespace OrderProcessingMVC.Filters
         }
 
         public static IEnumerable<Order> FilterByDate(IEnumerable<Order> orders,
-            string filterSartdate, string filterEndDate)
+            DateTime? filterSartdate, DateTime? filterEndDate)
         {
-            DateTime startDate;
-            DateTime endDate;
+            DateTime startDate = filterSartdate.HasValue ? filterSartdate.Value : filterEndDate.Value.AddMonths(AddMonths);
+            DateTime endDate = filterEndDate.HasValue ? filterEndDate.Value : DateTime.UtcNow;
+            //if (filterSartdate == null && filterEndDate != null)
+            //{
+            //    filterSartdate.Value = filterEndDate.Value.AddMonths(AddMonths);
+            //}
 
-            if (filterSartdate == null && filterEndDate != null)
+            //if (filterSartdate != null && filterEndDate == null)
+            //{
+            //    filterEndDate = DateTime.UtcNow;
+            //}
+
+            //else if (DateTime.TryParse(filterSartdate, out DateTime startDate)
+            //    && DateTime.TryParse(filterEndDate, out DateTime endDate))
+            //{
+            if (filterSartdate > filterEndDate)
             {
-                startDate = DateTime.UtcNow;
+                throw new Exception("Start date cannot be more that end date");
             }
-
-            if (filterSartdate != null && filterEndDate == null)
-            {
-                endDate = DateTime.UtcNow.AddMonths(AddMonths);
-            }
-
-            else if (DateTime.TryParse(filterSartdate, out startDate)
-                && DateTime.TryParse(filterEndDate, out endDate))
-            {
-                if (startDate > endDate)
-                {
-                    throw new Exception("Start date cannot be more that end date");
-                }
-                else
-                {
-                    orders = orders.Where(o => o.Date >= startDate && o.Date <= endDate);
-                }
-            }
-
             else
             {
-                throw new Exception("Incorrect dates");
+                orders = orders.Where(o => o.Date >= startDate && o.Date <= endDate);
             }
+            //}
+
+            //else
+            //{
+            //    throw new Exception("Incorrect dates");
+            //}
 
             return orders;
         }
 
         public static IEnumerable<Order> FilterByProvider(IEnumerable<Order> orders,
-            IEnumerable<Provider> providers)
+            IEnumerable<long> providerIDs)
         {
-            orders = orders.Where(o => providers.Contains(o.Provider));
+            orders = orders.Where(o => providerIDs.Contains(o.ProviderId));
             return orders;
         }
     }

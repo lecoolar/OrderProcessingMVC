@@ -15,19 +15,19 @@ namespace OrderProcessingMVC.Repositories
         }
 
         public async Task<IEnumerable<OrderItem>> GetOrderItemsAsync(string? sortBy = null, bool descending = false,
-            List<string>? filterNames = null,
-            List<string>? units = null)
+            IEnumerable<string>? filterNames = null,
+            IEnumerable<string>? units = null)
         {
             IEnumerable<OrderItem> orderItems = await _context.OrderItems.Include(o => o.Order).ToArrayAsync();
             if (sortBy != null)
             {
                 orderItems = OrderItemsFilters.SortOrderBy(orderItems, sortBy, descending);
             }
-            if (filterNames != null)
+            if (filterNames != null && filterNames.Count() != 0)
             {
                 orderItems = OrderItemsFilters.FilterByName(orderItems, filterNames);
             }
-            if (units != null)
+            if (units != null && units.Count() != 0 )
             {
                 orderItems = OrderItemsFilters.FilterByUnit(orderItems, units);
             }
@@ -53,9 +53,14 @@ namespace OrderProcessingMVC.Repositories
 
         public async Task AddOrderAsync(OrderItem orderItems)
         {
-            var order = await _context.Orders.Include(o => o.OrderItem).FirstOrDefaultAsync(p => p.Id == orderItems.OrderId);
+            var order = await _context.Orders.Include(o => o.OrderItem)
+                .FirstOrDefaultAsync(p => p.Id == orderItems.OrderId);
             if (order != null)
             {
+                if (order.Number == orderItems.Name)
+                {
+                    throw new Exception("OrderItem name cannot be equal Order number");
+                }
                 if (order.OrderItem == null)
                 {
                     order.OrderItem = new List<OrderItem>() { orderItems };
@@ -100,10 +105,10 @@ namespace OrderProcessingMVC.Repositories
             {
                 throw new Exception("Entity set 'OrderContext.OrderItems'  is null.");
             }
-            var order = await _context.OrderItems.FindAsync(id);
-            if (order != null)
+            var orderItem = await _context.OrderItems.FindAsync(id);
+            if (orderItem != null)
             {
-                _context.OrderItems.Remove(order);
+                _context.OrderItems.Remove(orderItem);
             }
 
             await _context.SaveChangesAsync();

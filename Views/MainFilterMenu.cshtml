@@ -1,0 +1,17 @@
+﻿<div class="list-group" id="list-tab" role="tablist">
+    <div class="align-self-center">
+        <h4 class="text-center mb-3">Filters</h4>
+        @if (ViewBag.FiltersBy == nameof(Order))
+        {
+            @Html.Partial("~/Views/Order/FilterMenu.cshtml")
+        }
+        @if (ViewBag.FiltersBy == nameof(OrderItem))
+        {
+            @Html.Partial("~/Views/OrderItem/FilterMenu.cshtml")
+        }
+        @if (ViewBag.FiltersBy == nameof(Provider))
+        {
+            @Html.Partial("~/Views/Provider/FilterMenu.cshtml")
+        }       
+    </div>
+</div>

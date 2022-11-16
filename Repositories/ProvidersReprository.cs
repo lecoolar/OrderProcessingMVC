@@ -25,16 +25,16 @@ namespace OrderProcessingMVC.Repositories
         }
 
         public async Task<IEnumerable<Provider>> GetProvidersAsync(string? sortBy = null, bool descending = false,
-            List<string>? filterName = null)
+            IEnumerable<string>? filterNames = null)
         {
             IEnumerable<Provider> providers = await _context.Providers.Include(p => p.Orders).ToArrayAsync();
             if (sortBy != null)
             {
                 providers = ProvidersFilters.SortOrderBy(providers, sortBy, descending);
             }
-            if (filterName != null && !providers.Any())
+            if (filterNames != null && filterNames.Count() != 0)
             {
-                providers = ProvidersFilters.FilterByName(providers, filterName);
+                providers = ProvidersFilters.FilterByName(providers, filterNames);
             }
             return providers;
         }

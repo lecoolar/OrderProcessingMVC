@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -24,11 +25,19 @@ namespace OrderProcessingMVC.Controllers
         }
 
         // GET: OrderItem
-        public async Task<IActionResult> Index(string? sortBy = null, bool descending = false)
+        [HttpGet]
+        public async Task<IActionResult> Index(string? sortBy = null, bool descending = false,
+            IEnumerable<string>? names = null,
+            IEnumerable<string>? units = null)
         {
             try
             {
-                var orderItems = await _orderItemRepository.GetOrderItemsAsync(sortBy, descending);
+                var orderItems = await _orderItemRepository.GetOrderItemsAsync(sortBy, descending,names,units);
+                ViewBag.FiltersBy = nameof(OrderItem);
+                ViewBag.Names = new MultiSelectList(await _orderItemRepository.GetOrderItemsAsync(),
+                    nameof(OrderItem.Name), nameof(OrderItem.Name), names);
+                ViewBag.Units = new MultiSelectList(await _orderItemRepository.GetOrderItemsAsync(),
+                    nameof(OrderItem.Unit), nameof(OrderItem.Unit), units);
                 return View(orderItems.ToList());
             }
             catch (Exception ex)
@@ -37,11 +46,22 @@ namespace OrderProcessingMVC.Controllers
             }
         }
 
-        public async Task<IActionResult> Sortby(string? sortBy = null, bool descending = false)
+        [HttpGet]
+        public async Task<IActionResult> Sortby(string? sortBy = null, bool descending = false,
+            IEnumerable<string>? names = null,
+            IEnumerable<string>? units = null)
         {
+            if (names != null)
+            {
+                names = names.Select(HttpUtility.UrlDecode);
+            }
+            if (units != null)
+            {
+                units = units.Select(HttpUtility.UrlDecode);
+            }
             try
             {
-                var orderItems = await _orderItemRepository.GetOrderItemsAsync(sortBy, descending);
+                var orderItems = await _orderItemRepository.GetOrderItemsAsync(sortBy, descending, names, units);
                 return PartialView("Index", orderItems.ToList());
             }
             catch (Exception ex)
@@ -51,6 +71,7 @@ namespace OrderProcessingMVC.Controllers
         }
 
         // GET: OrderItem/Details/5
+        [HttpGet]
         public async Task<IActionResult> Details(long? id)
         {
             try
@@ -65,6 +86,7 @@ namespace OrderProcessingMVC.Controllers
         }
 
         // GET: OrderItem/Create
+        [HttpGet]
         public async Task<IActionResult> CreateAsync()
         {
             try
@@ -102,6 +124,7 @@ namespace OrderProcessingMVC.Controllers
         }
 
         // GET: OrderItem/Edit/5
+        [HttpGet]
         public async Task<IActionResult> Edit(long? id)
         {
             try
@@ -145,6 +168,7 @@ namespace OrderProcessingMVC.Controllers
         }
 
         // GET: OrderItem/Delete/5
+        [HttpGet]
         public async Task<IActionResult> Delete(long? id)
         {
             try

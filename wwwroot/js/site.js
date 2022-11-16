@@ -5,6 +5,8 @@
 
 $('.sort').on("click", sortOrder);
 $(document).ready(btnActive);
+$(document).ready($('select').addClass('form-select filter-by'));
+
 
 function sortOrder() {
     var sortby = $.trim(this.innerText);
@@ -24,8 +26,18 @@ function sortOrder() {
         controller = 'Order';
     }
     $.ajax({
-        url: controller + "/Sortby",
-        data: { sortBy: sortby, descending: des },
+        url: "/" + controller + "/Sortby",
+        data: {
+            sortBy: sortby,
+            descending: des,
+            numbers: getUrlParameter('Numbers'),
+            filterStartDate: getUrlParameter('FilterStartDate'),
+            filterEndDate: getUrlParameter('FilterEndDate'),
+            providerIds: getUrlParameter('ProviderIds'),
+            names: getUrlParameter('Names'),
+            units: getUrlParameter('Units')
+        },
+        traditional: true,    
         success: function (data) {
             $('.main-content').html($.parseHTML(data));
             descendingBtn(sortby, des);
@@ -49,7 +61,6 @@ function descendingBtn(sortby, descending) {
 
 function btnActive() {
     var nametable = $.trim($('.name-table').text());
-    console.log(nametable);
     if (nametable == '') {
         nametable = $.trim($('h4').text());
         if (nametable === 'Order') {
@@ -58,3 +69,17 @@ function btnActive() {
     }
     $('.name-nav:contains(' + nametable + ')').addClass('active');
 }
+
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&');
+    var result = [];
+    sURLVariables = sURLVariables.filter((el) => el.includes(sParam));
+    for (var i = 0; i < sURLVariables.length; i++) {
+        var sParameterName = sURLVariables[i].split('=')[1];
+        result.push(sParameterName);
+    }
+    console.log(result);
+    return result;
+};
+

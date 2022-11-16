@@ -1,0 +1,13 @@
+﻿<form action="/Provider/Index" method="get">
+    @if (ViewBag.FilterNames != null)
+    {
+        <div class="mb-3 ml-1">
+            <h6 class="text-center text-primary">Name</h6>
+            @Html.DropDownList("Names", (MultiSelectList)ViewBag.FilterNames, new { multiple = "multiple"})
+        </div>
+    }
+    <div class="mb-3 ml-1 text-center">
+        <a asp-area="" asp-controller="Provider" asp-action="Index" type="button" class="btn btn-warning">Cansel</a>
+        <button type="submit" class="btn btn-success">Success</button>
+    </div>
+</form>

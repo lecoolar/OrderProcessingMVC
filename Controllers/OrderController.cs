@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
+using System.Xml.Linq;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -25,11 +28,28 @@ namespace OrderProcessingMVC.Controllers
         }
 
         // GET: Order
-        public async Task<IActionResult> Index(string? sortBy = null, bool descending = false)
+        [HttpGet]
+        public async Task<IActionResult> Index(string? sortBy = null, bool descending = false,
+            IEnumerable<string>? numbers = null,
+            DateTime? filterStartDate = null,
+            DateTime? filterEndDate = null,
+            IEnumerable<long>? providerIds = null)
         {
+            if (numbers != null)
+            {
+                numbers = numbers.Select(HttpUtility.UrlDecode);
+            }
             try
             {
-                var orders = await _ordersReprository.GetOrdersAsync(sortBy, descending);
+                var orders = await _ordersReprository.GetOrdersAsync(sortBy, descending, numbers,
+                    filterStartDate, filterEndDate, providerIds);
+                ViewBag.FiltersBy = nameof(Order);
+                ViewBag.Numbers = new MultiSelectList(await _ordersReprository.GetOrdersAsync(),
+                    nameof(Order.Number), nameof(Order.Number), numbers);
+                ViewBag.Providers = new MultiSelectList(await _providersRepository.GetProvidersAsync(),
+                    nameof(Provider.Id), nameof(Provider.Name), providerIds);
+                ViewBag.StartDate = filterStartDate == null ? String.Empty : filterStartDate.Value.ToString("yyyy-MM-ddTHH:mm");
+                ViewBag.EndDate = filterEndDate == null ? String.Empty : filterEndDate.Value.ToString("yyyy-MM-ddTHH:mm");
                 return View(orders.ToList());
             }
             catch (Exception ex)
@@ -38,11 +58,17 @@ namespace OrderProcessingMVC.Controllers
             }
         }
 
-        public async Task<IActionResult> Sortby(string? sortBy = null, bool descending = false)
+        [HttpGet]
+        public async Task<IActionResult> Sortby(string? sortBy = null, bool descending = false,
+            IEnumerable<string>? filterNumbers = null,
+            DateTime? filterStartDate = null,
+            DateTime? filterEndDate = null,
+            IEnumerable<long>? providerIds = null)
         {
             try
             {
-                var orders = await _ordersReprository.GetOrdersAsync(sortBy, descending);
+                var orders = await _ordersReprository.GetOrdersAsync(sortBy, descending, filterNumbers,
+                    filterStartDate, filterEndDate, providerIds);
                 return PartialView("Index", orders.ToList());
             }
             catch (Exception ex)
@@ -52,6 +78,7 @@ namespace OrderProcessingMVC.Controllers
         }
 
         // GET: Order/Details/5
+        [HttpGet]
         public async Task<IActionResult> Details(long? id)
         {
             try
@@ -66,6 +93,7 @@ namespace OrderProcessingMVC.Controllers
         }
 
         //// GET: Order/Create
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
             try
@@ -101,6 +129,7 @@ namespace OrderProcessingMVC.Controllers
         }
 
         //// GET: Order/Edit/5
+        [HttpGet]
         public async Task<IActionResult> Edit(long? id)
         {
             try
@@ -142,6 +171,7 @@ namespace OrderProcessingMVC.Controllers
         }
 
         //// GET: Order/Delete/5
+        [HttpGet]
         public async Task<IActionResult> Delete(long? id)
         {
             try
@@ -158,7 +188,6 @@ namespace OrderProcessingMVC.Controllers
         //// POST: Order/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-
         public async Task<IActionResult> DeleteConfirmed(long id)
         {
             try

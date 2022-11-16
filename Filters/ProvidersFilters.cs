@@ -38,7 +38,7 @@ namespace OrderProcessingMVC.Filters
         public static IEnumerable<Provider> FilterByName(IEnumerable<Provider> providers,
             IEnumerable<string> names)
         {
-            providers = providers.Where(o => names.Contains(o.Name));
+            providers = providers.Where(p => names.Contains(p.Name));
             return providers;
         }
     }

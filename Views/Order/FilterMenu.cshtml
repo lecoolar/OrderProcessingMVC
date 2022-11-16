@@ -1,0 +1,35 @@
+﻿<form action="/Order/Index" method="get">
+    @if (ViewBag.Numbers != null)
+    {
+        <div class="mb-3 ml-1">
+            <h6 class="text-center text-primary">Numbers</h6>
+            @Html.DropDownList("Numbers", (MultiSelectList)ViewBag.Numbers, new { multiple = "multiple"})
+        </div>
+    }
+    @if (ViewBag.Providers != null)
+    {
+        <div class="mb-3 ml-1">
+            <h6 class="text-center text-primary">Providers</h6>
+            @Html.DropDownList("ProviderIds", (MultiSelectList)ViewBag.Providers, new { multiple = "multiple"})
+        </div>
+    }
+    @if (ViewBag.StartDate != null && ViewBag.EndDate != null)
+    {
+        <div class="mb-3 ml-1">
+            <h6 class="text-center text-primary">Date</h6>
+            <div class="row">
+                <div class="col">
+                    <input type="datetime-local" class="form-control filter-by" name="FilterStartDate" value="@ViewBag.StartDate">
+                </div>
+                <div class="col">
+                    <input type="datetime-local" class="form-control filter-by" name="FilterEndDate" value="@ViewBag.EndDate">
+                </div>
+            </div>
+        </div>
+
+    }
+    <div class="mb-3 ml-1 text-center">
+        <a asp-area="" asp-controller="Order" asp-action="Index" type="button" class="btn btn-warning">Cansel</a>
+        <button type="submit" class="btn btn-success">Success</button>
+    </div>
+</form>

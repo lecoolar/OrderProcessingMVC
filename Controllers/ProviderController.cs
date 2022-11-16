@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -21,12 +22,16 @@ namespace OrderProcessingMVC.Controllers
         }
 
         // GET: Provider
+        [HttpGet]
         public async Task<IActionResult> Index(string? sortBy = null,
-            bool descending = false, List<string>? names = null)
+            bool descending = false, IEnumerable<string>? filterNames = null)
         {
             try
             {
-                var providers = await _providersRepository.GetProvidersAsync(sortBy, descending, names);
+                var providers = await _providersRepository.GetProvidersAsync(sortBy, descending, filterNames);
+                ViewBag.FiltersBy = nameof(Provider);
+                ViewBag.FilterNames = new MultiSelectList(await _providersRepository.GetProvidersAsync(),
+                    nameof(Provider.Name), nameof(Provider.Name), filterNames);
                 return View(providers.ToList());
             }
             catch (Exception ex)
@@ -35,12 +40,18 @@ namespace OrderProcessingMVC.Controllers
             }
         }
 
+
+        [HttpGet]
         public async Task<IActionResult> Sortby(string? sortBy = null,
-            bool descending = false, List<string>? names = null)
+            bool descending = false, IEnumerable<string>? filterNames = null)
         {
+            if (filterNames != null)
+            {
+                filterNames = filterNames.Select(HttpUtility.UrlDecode);
+            }
             try
             {
-                var providers = await _providersRepository.GetProvidersAsync(sortBy, descending, names);
+                var providers = await _providersRepository.GetProvidersAsync(sortBy, descending, filterNames);
                 return PartialView("Index", providers.ToList());
             }
             catch (Exception ex)
@@ -50,6 +61,7 @@ namespace OrderProcessingMVC.Controllers
         }
 
         // GET: Provider/Details/5
+        [HttpGet]
         public async Task<IActionResult> Details(long? id)
         {
             try
