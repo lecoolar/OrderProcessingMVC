@@ -5,11 +5,11 @@ using OrderProcessingMVC.Models;
 
 namespace OrderProcessingMVC.Repositories
 {
-    public class OrderItemRepository
+    public class OrderItemsRepository:IOrderItemsRepository
     {
         private readonly DateBaseOrderContext _context;
 
-        public OrderItemRepository(DateBaseOrderContext context)
+        public OrderItemsRepository(DateBaseOrderContext context)
         {
             _context = context;
         }

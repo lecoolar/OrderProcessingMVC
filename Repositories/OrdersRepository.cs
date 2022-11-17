@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace OrderProcessingMVC.Repositories
 {
-    public class OrdersRepository
+    public class OrdersRepository: IOrdersRepository
     {
         private readonly DateBaseOrderContext _context;
 

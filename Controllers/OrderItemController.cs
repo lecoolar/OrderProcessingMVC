@@ -8,10 +8,10 @@ namespace OrderProcessingMVC.Controllers
 {
     public class OrderItemController : Controller
     {
-        private readonly OrderItemRepository _orderItemRepository;
-        private readonly OrdersRepository _ordersReprository;
+        private readonly IOrderItemsRepository _orderItemRepository;
+        private readonly IOrdersRepository _ordersReprository;
 
-        public OrderItemController(OrderItemRepository orderItemRepository, OrdersRepository ordersRepository)
+        public OrderItemController(IOrderItemsRepository orderItemRepository, IOrdersRepository ordersRepository)
         {
             _orderItemRepository = orderItemRepository;
             _ordersReprository = ordersRepository;

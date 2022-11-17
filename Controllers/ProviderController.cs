@@ -8,9 +8,9 @@ namespace OrderProcessingMVC.Controllers
 {
     public class ProviderController : Controller
     {
-        private readonly ProvidersRepository _providersRepository;
+        private readonly IProvidersRepository _providersRepository;
 
-        public ProviderController(ProvidersRepository providersRepository)
+        public ProviderController(IProvidersRepository providersRepository)
         {
             _providersRepository = providersRepository;
         }

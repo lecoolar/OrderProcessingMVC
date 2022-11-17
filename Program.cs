@@ -17,9 +17,9 @@ else
 {
     builder.Services.AddDbContext<DateBaseOrderContext>(opt => opt.UseSqlite(builder.Configuration.GetSection("sqlConnectionString").ToString()));
 }
-builder.Services.AddScoped<OrdersRepository>();
-builder.Services.AddScoped<OrderItemRepository>();
-builder.Services.AddScoped<ProvidersRepository>();
+builder.Services.AddScoped<IOrdersRepository,OrdersRepository>();
+builder.Services.AddScoped<IOrderItemsRepository, OrderItemsRepository>();
+builder.Services.AddScoped<IProvidersRepository, ProvidersRepository>();
 var app = builder.Build();
 
 

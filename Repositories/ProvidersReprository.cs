@@ -5,22 +5,12 @@ using OrderProcessingMVC.Models;
 
 namespace OrderProcessingMVC.Repositories
 {
-    public class ProvidersRepository
+    public class ProvidersRepository: IProvidersRepository
     {
         private readonly DateBaseOrderContext _context;
 
         public ProvidersRepository(DateBaseOrderContext context)
         {
-            if (!context.Providers.Any())
-            {
-                context.Providers.Add(new Provider() { Name = "Магнит" });
-                context.Providers.Add(new Provider() { Name = "Пятерочка" });
-                context.Providers.Add(new Provider() { Name = "Красное белое" });
-                context.Providers.Add(new Provider() { Name = "Гуливер" });
-                context.Providers.Add(new Provider() { Name = "Лента" });
-                context.Providers.Add(new Provider() { Name = "Карусель" });
-                context.SaveChanges();
-            }
             _context = context;
         }
 
