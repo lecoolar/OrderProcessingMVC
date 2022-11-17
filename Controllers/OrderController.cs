@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Web;
-using System.Xml.Linq;
-using Microsoft.AspNetCore.Components.Forms;
+﻿using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using NuGet.Protocol.Core.Types;
-using OrderProcessingMVC.Context;
 using OrderProcessingMVC.Models;
 using OrderProcessingMVC.Repositories;
 
@@ -29,11 +19,11 @@ namespace OrderProcessingMVC.Controllers
 
         // GET: Order
         [HttpGet]
-        public async Task<IActionResult> Index(string? sortBy = null, bool descending = false,
-            IEnumerable<string>? numbers = null,
+        public async Task<IActionResult> Index(string sortBy = null, bool descending = false,
+            IEnumerable<string> numbers = null,
             DateTime? filterStartDate = null,
             DateTime? filterEndDate = null,
-            IEnumerable<long>? providerIds = null)
+            IEnumerable<long> providerIds = null)
         {
             if (numbers != null)
             {
@@ -65,11 +55,11 @@ namespace OrderProcessingMVC.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Sortby(string? sortBy = null, bool descending = false,
-            IEnumerable<string>? filterNumbers = null,
+        public async Task<IActionResult> Sortby(string sortBy = null, bool descending = false,
+            IEnumerable<string> filterNumbers = null,
             DateTime? filterStartDate = null,
             DateTime? filterEndDate = null,
-            IEnumerable<long>? providerIds = null)
+            IEnumerable<long> providerIds = null)
         {
             try
             {

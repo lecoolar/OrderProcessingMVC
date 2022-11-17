@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Web;
+﻿using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using OrderProcessingMVC.Context;
 using OrderProcessingMVC.Models;
 using OrderProcessingMVC.Repositories;
 
@@ -26,9 +19,9 @@ namespace OrderProcessingMVC.Controllers
 
         // GET: OrderItem
         [HttpGet]
-        public async Task<IActionResult> Index(string? sortBy = null, bool descending = false,
-            IEnumerable<string>? names = null,
-            IEnumerable<string>? units = null)
+        public async Task<IActionResult> Index(string sortBy = null, bool descending = false,
+            IEnumerable<string> names = null,
+            IEnumerable<string> units = null)
         {
             try
             {
@@ -51,9 +44,9 @@ namespace OrderProcessingMVC.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Sortby(string? sortBy = null, bool descending = false,
-            IEnumerable<string>? names = null,
-            IEnumerable<string>? units = null)
+        public async Task<IActionResult> Sortby(string sortBy = null, bool descending = false,
+            IEnumerable<string> names = null,
+            IEnumerable<string> units = null)
         {
             if (names != null)
             {

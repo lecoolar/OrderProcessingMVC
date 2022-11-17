@@ -1,10 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-using OrderProcessingMVC.Models;
-using System.Collections;
-using System.Collections.Generic;
+﻿using OrderProcessingMVC.Models;
 using System.Data;
-using System.Globalization;
-using System.Linq;
 
 namespace OrderProcessingMVC.Filters
 {
@@ -69,19 +64,7 @@ namespace OrderProcessingMVC.Filters
         {
             DateTime startDate = filterSartdate.HasValue ? filterSartdate.Value : filterEndDate.Value.AddMonths(AddMonths);
             DateTime endDate = filterEndDate.HasValue ? filterEndDate.Value : DateTime.UtcNow;
-            //if (filterSartdate == null && filterEndDate != null)
-            //{
-            //    filterSartdate.Value = filterEndDate.Value.AddMonths(AddMonths);
-            //}
 
-            //if (filterSartdate != null && filterEndDate == null)
-            //{
-            //    filterEndDate = DateTime.UtcNow;
-            //}
-
-            //else if (DateTime.TryParse(filterSartdate, out DateTime startDate)
-            //    && DateTime.TryParse(filterEndDate, out DateTime endDate))
-            //{
             if (filterSartdate > filterEndDate)
             {
                 throw new Exception("Start date cannot be more that end date");
@@ -90,13 +73,6 @@ namespace OrderProcessingMVC.Filters
             {
                 orders = orders.Where(o => o.Date >= startDate && o.Date <= endDate);
             }
-            //}
-
-            //else
-            //{
-            //    throw new Exception("Incorrect dates");
-            //}
-
             return orders;
         }
 

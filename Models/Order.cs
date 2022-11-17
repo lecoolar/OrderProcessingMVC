@@ -7,7 +7,7 @@
         public DateTime Date { get; set; }
         public long ProviderId { get; set; }
 
-        public ICollection<OrderItem>? OrderItem { get; set; }
-        public Provider? Provider { get; set; }
+        public ICollection<OrderItem> OrderItem { get; set; }
+        public Provider Provider { get; set; }
     }
 }

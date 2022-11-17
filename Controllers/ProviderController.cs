@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Web;
+﻿using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using OrderProcessingMVC.Context;
 using OrderProcessingMVC.Models;
 using OrderProcessingMVC.Repositories;
 
@@ -23,19 +17,19 @@ namespace OrderProcessingMVC.Controllers
 
         // GET: Provider
         [HttpGet]
-        public async Task<IActionResult> Index(string? sortBy = null,
-            bool descending = false, IEnumerable<string>? filterNames = null)
+        public async Task<IActionResult> Index(string sortBy = null,
+            bool descending = false, IEnumerable<string> names = null)
         {
             try
             {
-                var providers = await _providersRepository.GetProvidersAsync(sortBy, descending, filterNames);
+                var providers = await _providersRepository.GetProvidersAsync(sortBy, descending, names);
 
                 ViewBag.FiltersBy = nameof(Provider);
 
-                var names = await _providersRepository.GetProvidersAsync();
+                var filterNames = await _providersRepository.GetProvidersAsync();
 
-                ViewBag.FilterNames = new MultiSelectList(names.Distinct(),
-                    nameof(Provider.Name), nameof(Provider.Name), filterNames);
+                ViewBag.FilterNames = new MultiSelectList(filterNames.Distinct(),
+                    nameof(Provider.Name), nameof(Provider.Name), names);
                 return View(providers.ToList());
             }
             catch (Exception ex)
@@ -46,16 +40,16 @@ namespace OrderProcessingMVC.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> Sortby(string? sortBy = null,
-            bool descending = false, IEnumerable<string>? filterNames = null)
+        public async Task<IActionResult> Sortby(string sortBy = null,
+            bool descending = false, IEnumerable<string> names = null)
         {
-            if (filterNames != null)
+            if (names != null)
             {
-                filterNames = filterNames.Select(HttpUtility.UrlDecode);
+                names = names.Select(HttpUtility.UrlDecode);
             }
             try
             {
-                var providers = await _providersRepository.GetProvidersAsync(sortBy, descending, filterNames);
+                var providers = await _providersRepository.GetProvidersAsync(sortBy, descending, names);
                 return PartialView("Index", providers.ToList());
             }
             catch (Exception ex)

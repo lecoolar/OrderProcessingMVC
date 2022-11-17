@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Build.Evaluation;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using OrderProcessingMVC.Context;
 using OrderProcessingMVC.Filters;
 using OrderProcessingMVC.Models;
@@ -17,11 +15,11 @@ namespace OrderProcessingMVC.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Order>> GetOrdersAsync(string? sortBy = null, bool descending = false,
-            IEnumerable<string>? filterNumbers = null,
+        public async Task<IEnumerable<Order>> GetOrdersAsync(string sortBy = null, bool descending = false,
+            IEnumerable<string> filterNumbers = null,
             DateTime? filterStartDate = null,
             DateTime? filterEndDate = null,
-            IEnumerable<long>? providerIds = null)
+            IEnumerable<long> providerIds = null)
         {
             IEnumerable<Order> orders = await _context.Orders.Include(o => o.Provider).ToArrayAsync();
             if (sortBy != null)
@@ -98,6 +96,10 @@ namespace OrderProcessingMVC.Repositories
                     .FirstOrDefaultAsync(p => p.Id == order.ProviderId);
                 if (provider != null)
                 {
+                    if (provider.Orders == null)
+                    {
+                        throw new Exception("NotFound Orders");
+                    }
                     if (provider.Orders.FirstOrDefault(o => o.Number == order.Number) != null)
                     {
                         throw new Exception("Order number must be unique");

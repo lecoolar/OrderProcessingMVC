@@ -8,7 +8,7 @@ namespace OrderProcessingMVC.Context
         public DateBaseOrderContext(DbContextOptions<DateBaseOrderContext> options)
             : base(options)
         {
-            this.Database.EnsureCreated();
+            Database.EnsureCreated();
         }
 
         public DbSet<Order> Orders { get; set; }

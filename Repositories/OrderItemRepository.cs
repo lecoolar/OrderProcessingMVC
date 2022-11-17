@@ -14,9 +14,9 @@ namespace OrderProcessingMVC.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<OrderItem>> GetOrderItemsAsync(string? sortBy = null, bool descending = false,
-            IEnumerable<string>? filterNames = null,
-            IEnumerable<string>? units = null)
+        public async Task<IEnumerable<OrderItem>> GetOrderItemsAsync(string sortBy = null, bool descending = false,
+            IEnumerable<string> filterNames = null,
+            IEnumerable<string> units = null)
         {
             IEnumerable<OrderItem> orderItems = await _context.OrderItems.Include(o => o.Order).ToArrayAsync();
             if (sortBy != null)
@@ -83,10 +83,15 @@ namespace OrderProcessingMVC.Repositories
         {
             try
             {
-                var oldOrderItem = await _context.OrderItems.Include(o => o.Order)
-                    .FirstOrDefaultAsync(o => o.Id == orderItem.Id);
-                orderItem.OrderId = oldOrderItem.OrderId;
-                orderItem.Order = oldOrderItem.Order;
+                var order = await _context.Orders.Include(o => o.Provider)
+                    .FirstOrDefaultAsync(o => o.Id == orderItem.OrderId);
+                if (order == null)
+                {
+                    throw new Exception("NotFound OrderItem");
+                }
+                orderItem.OrderId = order.Id;
+                orderItem.Order = order;
+
                 _context.Update(orderItem);
                 await _context.SaveChangesAsync();
             }
